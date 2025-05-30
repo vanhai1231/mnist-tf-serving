@@ -15,13 +15,19 @@ Dự án này minh hoạ cách triển khai một mô hình phân loại chữ s
 ## 📁 Cấu trúc thư mục dự án
 
 ```
-mnist-tf-serving/
+tf-serving-mnist/
 ├── models/
 │   └── mnist/
 │       └── 1/
 │           ├── saved_model.pb
-│           └── variables/
+│           ├── variables/
+│           └── fingerprint.pb
+├── test/
+│   ├── input.json
 ├── Dockerfile
+├── generate_input.py
+├── predict.py
+├── train_mnist_tf.py
 ├── render.yaml
 ├── README.md
 ```
@@ -32,7 +38,7 @@ mnist-tf-serving/
 
 Mô hình được huấn luyện bằng TensorFlow/Keras để phân loại chữ số từ tập dữ liệu MNIST. Mô hình được xuất ra theo định dạng **SavedModel** (yêu cầu của TensorFlow Serving).
 
-Lệnh để huấn luyện và xuất model:
+Chạy lệnh sau để huấn luyện và lưu mô hình:
 
 ```bash
 python train_mnist_tf.py
@@ -53,10 +59,7 @@ models/mnist/1/
 ```Dockerfile
 FROM tensorflow/serving
 COPY models/mnist /models/mnist
-ENTRYPOINT ["/usr/bin/tensorflow_model_server", 
-            "--rest_api_port=8501", 
-            "--model_name=mnist", 
-            "--model_base_path=/models/mnist"]
+ENTRYPOINT ["/usr/bin/tensorflow_model_server", "--rest_api_port=8501", "--model_name=mnist", "--model_base_path=/models/mnist"]
 ```
 
 ---
@@ -94,22 +97,26 @@ https://<tên-service>.onrender.com/v1/models/mnist:predict
 
 ## 📬 Gửi yêu cầu để test API
 
-Tạo file `test/input.json` với dữ liệu:
+### 📄 Tạo file input (tự động bằng Python):
 
-```json
-{
-  "instances": [
-    [[[...giá trị ảnh 28x28 đã chuẩn hoá...]]]
-  ]
-}
+```bash
+python generate_input.py
 ```
 
-Gửi bằng curl:
+File `test/input.json` sẽ được tạo từ ảnh MNIST thật.
+
+### 🧪 Gửi yêu cầu bằng curl:
 
 ```bash
 curl -X POST https://<tên-service>.onrender.com/v1/models/mnist:predict \
   -H "Content-Type: application/json" \
   -d @test/input.json
+```
+
+### 📄 Hoặc test bằng Python:
+
+```bash
+python predict.py
 ```
 
 ---
