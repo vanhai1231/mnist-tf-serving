@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mnist-tf-serving
+    env: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 8501
